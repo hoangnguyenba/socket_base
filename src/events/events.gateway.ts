@@ -5,23 +5,37 @@ import {
   OnGatewayDisconnect,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
+import { JwtService } from '@nestjs/jwt';
+import { Logger } from '@nestjs/common';
 
 @WebSocketGateway()
 export class EventsGateway implements OnGatewayConnection<Socket>, OnGatewayDisconnect<Socket> {
+
+  constructor(private readonly jwtService: JwtService) {}
+
   @WebSocketServer()
   server: Server;
 
-  handleConnection(client: Socket) {
-    client.join('user-1');
-    console.log('connenected');
+  async handleConnection(client: Socket) {
+    try {
+      const user = await this.jwtService.verify(client.handshake.query.token);
+      client.join(`USER-${user.id}`);
+      Logger.log(`USER-${user.id} connected`);
+    } catch (error) {
+      client.disconnect(true);
+    }
   }
 
-  handleDisconnect(client: Socket) {
-    client.leave('user-1');
-    console.log('disconnected');
+  async handleDisconnect(client: Socket) {
+    try {
+      const user = await this.jwtService.verify(client.handshake.query.token);
+      client.leave(`USER-${user.id}`);
+      Logger.log(`USER-${user.id} disconnected`);
+    } catch (error) {}
   }
 
-  sendDataToRoom(roomId: string, data: any) {
-    this.server.to(roomId).emit('events', data);
+  sendDataToRoom(params: {roomId: string, event: string, data: any}) {
+    const { roomId, event, data }  = params;
+    this.server.to(roomId).emit(event, data);
   }
 }

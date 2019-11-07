@@ -2,7 +2,11 @@
   <head>
     <script src="socket.io.js"></script>
     <script>
-      const socket = io('http://localhost:4000');
+      const socket = io('http://localhost:4000', {
+        query: {
+          token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTYsImlhdCI6MTU3MzExMzg4MiwiZXhwIjoxNjA0MjE3ODgyfQ.86-T2zS5Yy4GAkQjJyvgZaIaSP1x7GKZ9OhcABBSAjA'
+        }
+      });
       socket.on('connect', function() {
         console.log('Connected');
 
@@ -11,7 +15,7 @@
           console.log('Identity:', response),
         );
       });
-      socket.on('events', function(data) {
+      socket.on('notify', function(data) {
         console.log('event', data);
       });
       socket.on('exception', function(data) {

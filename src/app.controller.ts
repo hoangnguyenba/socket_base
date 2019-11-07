@@ -1,6 +1,4 @@
 import { Get, Controller, UseGuards } from '@nestjs/common';
-// import { AuthGuard } from '@nestjs/passport';
-// import { ApiBearerAuth } from '@nestjs/swagger';
 import { AppService } from './app.service';
 import { EventsGateway } from './events/events.gateway';
 
@@ -13,9 +11,8 @@ export class AppController {
   ) {}
 
   @Get('/')
-  // @UseGuards(AuthGuard())
   root() {
-    this.eventsGateway.sendDataToRoom('user-1', {m: 'hello'});
+    this.eventsGateway.sendDataToRoom({roomId: 'USER-16', event: 'notify', data: {message: 'hello'}});
     return this.appService.root();
   }
 }
